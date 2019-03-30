@@ -25,8 +25,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        setPreferences();
 
         setContentView(R.layout.activity_main);
 
@@ -41,6 +40,21 @@ public class MainActivity extends AppCompatActivity {
         }
 
         setupWebView();
+    }
+
+    private void setPreferences() {
+        SharedPreferences preferences = getSharedPreferences(S4FRAME_PREF, MODE_PRIVATE);
+        Boolean alwaysOn = Boolean.valueOf(preferences.getString("alwaysOn", "false"));
+        Boolean fullScreenOn = Boolean.valueOf(preferences.getString("fullScreenOn", "true"));
+
+        if (alwaysOn) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+
+        if (fullScreenOn) {
+            requestWindowFeature(Window.FEATURE_NO_TITLE);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
     }
 
     private WebView setupWebView() {
