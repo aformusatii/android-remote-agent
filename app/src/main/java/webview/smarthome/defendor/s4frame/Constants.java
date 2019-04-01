@@ -12,6 +12,9 @@ public class Constants {
     public static final String PROP_USERNAME_NAME = "username";
     public static final String PROP_PASSWORD_NAME = "password";
     public static final String PROP_BRIGHTNESS_NAME = "brightness";
+    public static final String PROP_ALWAYS_ON = "alwaysOn";
+    public static final String PROP_FULL_SCREEN_ON = "fullScreenOn";
+    public static final String PROP_VOLUME = "volume";
 
     public static final String CONTENT_TYPE_JSON = "application/json; charset=utf-8";
 

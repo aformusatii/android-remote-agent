@@ -23,7 +23,7 @@ public class HTTPListenerService extends Service {
         Log.d("S4Frame", "HTTPListenerService->onCreate");
 
         PowerManager powerManager = ((PowerManager) getSystemService(Context.POWER_SERVICE));
-        wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "s4frame:TAG");
+        wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "S4FrameService:TAG");
         activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
 

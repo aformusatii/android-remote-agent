@@ -39,6 +39,7 @@ public class HTTPServer {
         this.service = service;
         this.activityManager = activityManager;
         this.wakeLock = wakeLock;
+        this.audioManager = audioManager;
         setupHTTPServer();
     }
 
@@ -58,6 +59,21 @@ public class HTTPServer {
                 if(!taskInfo.isEmpty()) {
                     Gson gson = new Gson();
                     String json = gson.toJson(taskInfo.get(0));
+                    response.send(CONTENT_TYPE_JSON, json);
+                } else {
+                    response.code(501);
+                    response.end();
+                }
+            }
+        });
+
+        server.get("/activities", new HttpServerRequestCallback() {
+            @Override
+            public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
+                List<ActivityManager.RunningTaskInfo> taskInfo = activityManager.getRunningTasks(Integer.MAX_VALUE);
+                if(!taskInfo.isEmpty()) {
+                    Gson gson = new Gson();
+                    String json = gson.toJson(taskInfo);
                     response.send(CONTENT_TYPE_JSON, json);
                 } else {
                     response.code(501);
@@ -183,6 +199,25 @@ public class HTTPServer {
             }
         });
 
+        server.get("/stream/volume", new HttpServerRequestCallback() {
+            @Override
+            public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
+                JSONObject obj = new JSONObject();
+                Integer volume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                addProperty(obj, PROP_VOLUME, volume);
+                response.send(obj);
+            }
+        });
+
+        server.post("/stream/volume", new HttpServerRequestCallback() {
+            @Override
+            public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
+                String volume = request.getBody().get().toString().trim();
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, Integer.valueOf(volume), 0);
+                response.send("DONE");
+            }
+        });
+
         server.get("/settings", new HttpServerRequestCallback() {
             @Override
             public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
@@ -221,6 +256,23 @@ public class HTTPServer {
                     addProperty(obj, PROP_RUN_FLAG, true);
                 } catch (Exception e) {
                     addProperty(obj, PROP_RUN_FLAG, false);
+                    addProperty(obj, PROP_ERROR_MSG, e.getMessage());
+                    e.printStackTrace();
+                }
+
+                response.send(obj);
+            }
+        });
+
+        server.get("/brightness", new HttpServerRequestCallback() {
+            @Override
+            public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
+                JSONObject obj = new JSONObject();
+
+                try {
+                    Integer brightness = android.provider.Settings.System.getInt(service.getContentResolver(), android.provider.Settings.System.SCREEN_BRIGHTNESS);
+                    addProperty(obj, PROP_BRIGHTNESS_NAME, brightness);
+                } catch (Exception e) {
                     addProperty(obj, PROP_ERROR_MSG, e.getMessage());
                     e.printStackTrace();
                 }

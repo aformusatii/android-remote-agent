@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -44,11 +46,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void setPreferences() {
         SharedPreferences preferences = getSharedPreferences(S4FRAME_PREF, MODE_PRIVATE);
-        Boolean alwaysOn = Boolean.valueOf(preferences.getString("alwaysOn", "false"));
-        Boolean fullScreenOn = Boolean.valueOf(preferences.getString("fullScreenOn", "true"));
+        Boolean alwaysOn = Boolean.valueOf(preferences.getString(PROP_ALWAYS_ON, "false"));
+        Boolean fullScreenOn = Boolean.valueOf(preferences.getString(PROP_FULL_SCREEN_ON, "true"));
 
         if (alwaysOn) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    togglePowerLock();
+                }
+            }, 3000);
         }
 
         if (fullScreenOn) {
@@ -90,6 +99,16 @@ public class MainActivity extends AppCompatActivity {
         });
 
         return wv;
+    }
+
+    private void togglePowerLock() {
+        PowerManager powerManager = ((PowerManager) getSystemService(Context.POWER_SERVICE));
+        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "S4FrameActivity:TAG");
+        try {
+            wakeLock.acquire();
+        } finally {
+            wakeLock.release();
+        }
     }
 
     public void onStart() {
